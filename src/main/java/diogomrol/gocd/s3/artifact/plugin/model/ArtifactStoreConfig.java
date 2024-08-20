@@ -30,8 +30,9 @@ import java.util.List;
 
 public class ArtifactStoreConfig implements Validatable {
 
-    private static final ImmutableSet<String> OPTIONAL_PROPERTIES = ImmutableSet.of("Region", "AWSAccessKey", "AWSSecretAccessKey");
+    private static final ImmutableSet<String> OPTIONAL_PROPERTIES = ImmutableSet.of("Region", "AWSAccessKey", "AWSSecretAccessKey", "ServiceEndpoint");
     private static final ImmutableSet<String> AWS_ACCESS_PROPERTIES = ImmutableSet.of("AWSAccessKey", "AWSSecretAccessKey");
+    private static final ImmutableSet<String> SERVICE_ENDPOINT_PROPERTIES = ImmutableSet.of( "Region","ServiceEndpoint");
 
     @Expose
     @SerializedName("S3Bucket")
@@ -53,15 +54,20 @@ public class ArtifactStoreConfig implements Validatable {
     @FieldMetadata(key = "AWSSecretAccessKey", required = false, secure = true)
     private String awssecretaccesskey;
 
+    @Expose
+    @SerializedName("ServiceEndpoint")
+    @FieldMetadata(key = "ServiceEndpoint", required = false)
+    private String serviceendpoint;
 
     public ArtifactStoreConfig() {
     }
 
-    public ArtifactStoreConfig(String s3bucket, String region, String awsaccesskey, String awssecretaccesskey) {
+    public ArtifactStoreConfig(String s3bucket, String region, String awsaccesskey, String awssecretaccesskey, String serviceendpoint) {
         this.s3bucket = s3bucket;
         this.region = region;
         this.awsaccesskey = awsaccesskey;
         this.awssecretaccesskey = awssecretaccesskey;
+        this.serviceendpoint = serviceendpoint;
     }
 
     public String getS3bucket() {
@@ -78,6 +84,10 @@ public class ArtifactStoreConfig implements Validatable {
         return awssecretaccesskey;
     }
 
+    public String getServiceEndpoint() {
+        return serviceendpoint;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,6 +97,7 @@ public class ArtifactStoreConfig implements Validatable {
 
         if (s3bucket != null ? !s3bucket.equals(that.s3bucket) : that.s3bucket != null) return false;
         if (region != null ? !region.equals(that.region) : that.region != null) return false;
+        if (serviceendpoint != null ? !serviceendpoint.equals(that.serviceendpoint) : that.serviceendpoint != null) return false;
         if (awsaccesskey != null ? !awsaccesskey.equals(that.awsaccesskey) : that.awsaccesskey != null) return false;
         return awssecretaccesskey != null ? awssecretaccesskey.equals(that.awssecretaccesskey) : that.awssecretaccesskey == null;
     }
@@ -109,6 +120,9 @@ public class ArtifactStoreConfig implements Validatable {
         List<ValidationError> validationErrors = Lists.newArrayList();
         validationErrors.addAll(validateAllFieldsAsRequired(OPTIONAL_PROPERTIES));
         validationErrors.addAll(validateAllOrNoneRequired(AWS_ACCESS_PROPERTIES));
+        if (Util.isNotBlank(serviceendpoint)){
+            validationErrors.addAll(validateAllOrNoneRequired(SERVICE_ENDPOINT_PROPERTIES));
+        }
 
         return new ValidationResult(validationErrors);
 
