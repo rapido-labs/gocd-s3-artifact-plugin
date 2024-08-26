@@ -130,4 +130,40 @@ public class ValidateArtifactStoreConfigExecutorExecutorTest {
         String expectedJSON = "[]";
         JSONAssert.assertEquals(expectedJSON, response.responseBody(), JSONCompareMode.NON_EXTENSIBLE);
     }
+
+    @Test
+    public void shouldAcceptServiceEndpoint() throws JSONException {
+        String requestBody = new JSONObject()
+                .put("S3Bucket", "http://localhost/index")
+                .put("Region", "us-west-1")
+                .put("ServiceEndpoint", "http://localhost:9000")
+                .toString();
+        when(request.requestBody()).thenReturn(requestBody);
+
+        final GoPluginApiResponse response = new ValidateArtifactStoreConfigExecutor(request).execute();
+        String expectedJSON = "[]";
+        JSONAssert.assertEquals(expectedJSON, response.responseBody(), JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    public void shouldRejectServiceEndpointWithoutRegion() throws JSONException {
+        String requestBody = new JSONObject()
+                .put("S3Bucket", "http://localhost/index")
+                .put("ServiceEndpoint", "http://localhost:9000")
+                .toString();
+        when(request.requestBody()).thenReturn(requestBody);
+
+        final GoPluginApiResponse response = new ValidateArtifactStoreConfigExecutor(request).execute();
+        String expectedJSON = "[\n" +
+                "  {\n" +
+                "    \"key\": \"ServiceEndpoint\",\n" +
+                "    \"message\": \"Region and ServiceEndpoint must be filled altogether, if required.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"key\": \"Region\",\n" +
+                "    \"message\": \"Region and ServiceEndpoint must be filled altogether, if required.\"\n" +
+                "  }\n" +
+                "]";
+        JSONAssert.assertEquals(expectedJSON, response.responseBody(), JSONCompareMode.NON_EXTENSIBLE);
+    }
 }
